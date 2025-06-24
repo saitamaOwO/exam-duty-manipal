@@ -35,7 +35,7 @@ public class StaffEligibilityService {
             Staff staff = staffOpt.get();
             logger.debug("Staff found: {} - Type: {}", staffId, staff.getStaffType());
             
-            // Only teaching staff are eligible
+            //Only teaching staff are eligible
             if (!"TEACHING".equals(staff.getStaffType())) {
                 logger.debug("Staff {} is not teaching staff", staffId);
                 return false;

@@ -352,7 +352,7 @@ public class SlotPreferenceService {
     }
     
     /*
-    Get staff duty info for viewing (allows HOD and CCC to view their info)
+    Get staff duty info for viewing(allows HOD and CCC to view their info)
      */
     public StaffDutyInfo getStaffDutyInfoForViewing(String staffId, Integer academicYear, String term) {
         Optional<Staff> staffOpt = staffRepository.findByStaffId(staffId);
@@ -363,7 +363,7 @@ public class SlotPreferenceService {
         Staff staff = staffOpt.get();
         String staffName = staff.getFirstName() + " " + staff.getLastName();
         
-        //Get required duties based on cadre (will be 0 for HOD and CCC)
+        //Get required duties based on cadre(will be 0 for HOD and CCC)
         Optional<StaffDuty> staffDutyOpt = staffDutyRepository.findByStaffIdAndAcademicYearAndTerm(staffId, academicYear, term);
         Integer requiredDuties = staffDutyOpt.map(StaffDuty::getDutyCount).orElse(0);
         
@@ -385,7 +385,7 @@ public class SlotPreferenceService {
     }
     
     /*
-    Get staff selected slots for viewing (allows HOD and CCC to view their selections)
+    Get staff selected slots for viewing(allows HOD and CCC to view their selections)
      */
     public List<SlotResponse> getStaffSelectedSlotsForViewing(String staffId) {
         List<ExamSlot> selectedSlots = examSlotRepository.findByPreferredBy(staffId);

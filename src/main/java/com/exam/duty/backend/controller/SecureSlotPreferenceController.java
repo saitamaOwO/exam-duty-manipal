@@ -40,7 +40,7 @@ public class SecureSlotPreferenceController {
     private SlotPreferenceService slotPreferenceService;
     
     /*
-     Get available slots for authenticated faculty member (FACULTY only)
+     Get available slots for authenticated faculty member(faculty only)
     */
     @GetMapping("/available")
     @PreAuthorize("hasRole('FACULTY')")
@@ -64,7 +64,7 @@ public class SecureSlotPreferenceController {
     }
     
     /*
-     View all slots (HOD, CCC, ADMIN can view but not select)
+     View all slots(HOD, CCC, ADMIN can only view)
     */
     @GetMapping("/view/all")
     @PreAuthorize("hasAnyRole('HOD', 'CCC', 'ADMIN', 'FACULTY')")
@@ -83,7 +83,7 @@ public class SecureSlotPreferenceController {
     }
     
     /*
-     Select a slot preference (FACULTY only - excludes HOD and CCC)
+     Select a slot preference(faculty only excludes HOD and CCC)
     */
     @PostMapping("/select")
     @PreAuthorize("hasRole('FACULTY')")
@@ -124,7 +124,7 @@ public class SecureSlotPreferenceController {
     }
 
     /*
-     Remove a slot preference (FACULTY only - excludes HOD and CCC)
+     Remove a slot preference(faculty only excludes HOD and CCC)
     */
     @DeleteMapping("/remove")
     @PreAuthorize("hasRole('FACULTY')")
@@ -165,7 +165,7 @@ public class SecureSlotPreferenceController {
     }
     
     /*
-     Remove a selected slot by exam duty ID (Alternative endpoint for easier frontend integration)
+     Remove a selected slot by exam duty ID
     */
     @DeleteMapping("/remove/{examDutyId}")
     @PreAuthorize("hasRole('FACULTY')")
@@ -200,7 +200,7 @@ public class SecureSlotPreferenceController {
     }
     
     /*
-     Get staff duty information (All authenticated users can view)
+     Get staff duty information(All authenticated users can view)
     */
     @GetMapping("/duty-info")
     @PreAuthorize("hasAnyRole('FACULTY', 'HOD', 'CCC', 'ADMIN')")
@@ -223,7 +223,7 @@ public class SecureSlotPreferenceController {
     }
     
     /*
-     Get authenticated staff's selected slots (All authenticated users can view their own)
+     Get authenticated staff's selected slots(All authenticated users can view their own)
     */
     @GetMapping("/selected")
     @PreAuthorize("hasAnyRole('FACULTY', 'HOD', 'CCC', 'ADMIN')")
