@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/exam_duty_db
+    username: postgres
+    password: your_db_password
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
