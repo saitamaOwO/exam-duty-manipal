@@ -29,6 +29,7 @@ import com.exam.duty.backend.service.SlotPreferenceService;
 
 import jakarta.validation.Valid;
 
+
 @RestController
 @RequestMapping("/api/secure/slot-preferences")
 @CrossOrigin(origins = "*")
@@ -39,9 +40,10 @@ public class SecureSlotPreferenceController {
     @Autowired
     private SlotPreferenceService slotPreferenceService;
     
-    /*
-     Get available slots for authenticated faculty member(faculty only)
-    */
+    /**
+     * Get available slots for authenticated faculty member (FACULTY only)
+     * GET /api/secure/slot-preferences/available?academicYear=2025&term=mid-term
+     */
     @GetMapping("/available")
     @PreAuthorize("hasRole('FACULTY')")
     public ResponseEntity<List<SlotResponse>> getAvailableSlots(
@@ -63,9 +65,10 @@ public class SecureSlotPreferenceController {
         }
     }
     
-    /*
-     View all slots(HOD, CCC, ADMIN can only view)
-    */
+    /**
+     * View all slots (HOD, CCC, ADMIN can view but not select)
+     * GET /api/secure/slot-preferences/view/all?academicYear=2025&term=mid-term
+     */
     @GetMapping("/view/all")
     @PreAuthorize("hasAnyRole('HOD', 'CCC', 'ADMIN', 'FACULTY')")
     public ResponseEntity<List<SlotResponse>> viewAllSlots(
@@ -82,9 +85,10 @@ public class SecureSlotPreferenceController {
         }
     }
     
-    /*
-     Select a slot preference(faculty only excludes HOD and CCC)
-    */
+    /**
+     * Select a slot preference (FACULTY only - excludes HOD and CCC)
+     * POST /api/secure/slot-preferences/select
+     */
     @PostMapping("/select")
     @PreAuthorize("hasRole('FACULTY')")
     public ResponseEntity<Map<String, Object>> selectSlotPreference(
@@ -94,7 +98,7 @@ public class SecureSlotPreferenceController {
             String staffId = JwtUtil.getStaffIdFromAuthentication(authentication);
             logger.debug("Staff {} selecting slot - Exam: {}, Slot: {}", staffId, request.getExamId(), request.getSlotId());
             
-            //Convert to internal request format
+            // Convert to internal request format
             SlotPreferenceRequest internalRequest = new SlotPreferenceRequest(
                 request.getExamId(), request.getSlotId(), staffId
             );
@@ -122,10 +126,11 @@ public class SecureSlotPreferenceController {
             ));
         }
     }
-
-    /*
-     Remove a slot preference(faculty only excludes HOD and CCC)
-    */
+    
+    /**
+     * Remove a slot preference (FACULTY only - excludes HOD and CCC)
+     * DELETE /api/secure/slot-preferences/remove
+     */
     @DeleteMapping("/remove")
     @PreAuthorize("hasRole('FACULTY')")
     public ResponseEntity<Map<String, Object>> removeSlotPreference(
@@ -135,7 +140,7 @@ public class SecureSlotPreferenceController {
             String staffId = JwtUtil.getStaffIdFromAuthentication(authentication);
             logger.debug("Staff {} removing slot - Exam: {}, Slot: {}", staffId, request.getExamId(), request.getSlotId());
             
-            //Convert to internal request format
+            // Convert to internal request format
             SlotPreferenceRequest internalRequest = new SlotPreferenceRequest(
                 request.getExamId(), request.getSlotId(), staffId
             );
@@ -164,9 +169,10 @@ public class SecureSlotPreferenceController {
         }
     }
     
-    /*
-     Remove a selected slot by exam duty ID
-    */
+    /**
+     * Remove a selected slot by exam duty ID (Alternative endpoint for easier frontend integration)
+     * DELETE /api/secure/slot-preferences/remove/{examDutyId}
+     */
     @DeleteMapping("/remove/{examDutyId}")
     @PreAuthorize("hasRole('FACULTY')")
     public ResponseEntity<Map<String, Object>> removeSlotPreferenceById(
@@ -199,18 +205,20 @@ public class SecureSlotPreferenceController {
         }
     }
     
-    /*
-     Get staff duty information(All authenticated users can view)
-    */
+    /**
+     * Get staff duty information (All authenticated users can view)
+     * GET /api/secure/slot-preferences/duty-info?academicYear=2025&term=mid-term
+     */
     @GetMapping("/duty-info")
     @PreAuthorize("hasAnyRole('FACULTY', 'HOD', 'CCC', 'ADMIN')")
     public ResponseEntity<StaffDutyInfo> getStaffDutyInfo(
-            @RequestParam Integer academicYear,
-            @RequestParam String term,
+            @RequestParam(defaultValue = "2025") Integer academicYear,
+            @RequestParam(defaultValue = "mid-term") String term,
             Authentication authentication) {
         
         try {
             String staffId = JwtUtil.getStaffIdFromAuthentication(authentication);
+            logger.debug("Getting duty info for staff: {} - Year: {}, Term: {}", staffId, academicYear, term);
             StaffDutyInfo dutyInfo = slotPreferenceService.getStaffDutyInfoForViewing(staffId, academicYear, term);
             return ResponseEntity.ok(dutyInfo);
         } catch (RuntimeException e) {
@@ -222,9 +230,10 @@ public class SecureSlotPreferenceController {
         }
     }
     
-    /*
-     Get authenticated staff's selected slots(All authenticated users can view their own)
-    */
+    /**
+     * Get authenticated staff's selected slots (All authenticated users can view their own)
+     * GET /api/secure/slot-preferences/selected
+     */
     @GetMapping("/selected")
     @PreAuthorize("hasAnyRole('FACULTY', 'HOD', 'CCC', 'ADMIN')")
     public ResponseEntity<List<SlotResponse>> getStaffSelectedSlots(Authentication authentication) {
@@ -239,9 +248,10 @@ public class SecureSlotPreferenceController {
         }
     }
     
-    /*
-     Admin endpoint to view all slot preferences with staff details
-    */
+    /**
+     * Admin endpoint to view all slot preferences with staff details
+     * GET /api/secure/slot-preferences/admin/all-with-staff?academicYear=2025&term=mid-term
+     */
     @GetMapping("/admin/all-with-staff")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<SlotResponse>> getAllSlotPreferencesWithStaff(

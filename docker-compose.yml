@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  #PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: exam-duty-postgres
+    environment:
+      POSTGRES_DB: exam_duty_allocation
+      POSTGRES_USER: examduty
+      POSTGRES_PASSWORD: examduty123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/docker-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - exam-duty-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U examduty -d exam_duty_allocation"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  #Spring Boot Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: exam-duty-app
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/exam_duty_allocation
+      SPRING_DATASOURCE_USERNAME: examduty
+      SPRING_DATASOURCE_PASSWORD: examduty123
+      JWT_SECRET: myVerySecretKeyForJWTTokenGenerationThatShouldBeAtLeast256BitsLongForDockerEnvironment
+      JWT_EXPIRATION: 86400000
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - exam-duty-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/api/auth/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+
+  #pgAdmin for Database Management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: exam-duty-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@examduty.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - exam-duty-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  exam-duty-network:
+    driver: bridge
