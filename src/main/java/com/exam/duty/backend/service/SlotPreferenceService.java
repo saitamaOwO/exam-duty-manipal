@@ -47,7 +47,7 @@ public class SlotPreferenceService {
     private StaffEligibilityService staffEligibilityService;
     
     public List<SlotResponse> getAvailableSlots(String staffId, Integer academicYear, String term) {
-        //check if staff is eligible for exam duties
+        // First check if staff is eligible for exam duties
         if (!staffEligibilityService.isEligibleForExamDuty(staffId)) {
             throw new RuntimeException(staffEligibilityService.getIneligibilityReason(staffId));
         }
@@ -55,7 +55,7 @@ public class SlotPreferenceService {
         List<Exam> exams = examRepository.findExamsForSlotGeneration(academicYear, term);
         List<SlotResponse> slots = new ArrayList<>();
         
-        //prof teaching courses to exclude
+        // Get staff's teaching courses to exclude
         Optional<Staff> staffOpt = staffRepository.findByStaffId(staffId);
         List<String> teachingCourses = new ArrayList<>();
         if (staffOpt.isPresent()) {
@@ -71,7 +71,7 @@ public class SlotPreferenceService {
         for (Exam exam : exams) {
             logger.debug("Processing exam for course: {}", exam.getCourseCode());
             
-            //Generate slots for each exam based on required duties
+            // Generate slots for each exam based on required duties
             int totalSlots = exam.getNoOfInvigilators() + exam.getNoOfRelievers() + exam.getNoOfSquads();
             
             for (int slotId = 1; slotId <= totalSlots; slotId++) {
@@ -83,7 +83,7 @@ public class SlotPreferenceService {
                 slot.setExamDate(exam.getExamDate());
                 slot.setTime(exam.getTime());
                 
-                //Check if the slot is already filled
+                // Check if slot is already taken
                 Optional<ExamSlot> existingSlot = examSlotRepository.findByExamIdAndSlotId(exam.getExamId(), slotId);
                 
                 if (existingSlot.isPresent()) {
@@ -100,18 +100,18 @@ public class SlotPreferenceService {
                 } else {
                     slot.setStatus("AVAILABLE");
                     
-                    //Check if staff can select this slot
+                    // Check if staff can select this slot
                     boolean canSelect = true;
                     String reason = "";
                     
-                    //Rule1: Cannot select course they teach
+                    // Rule: Cannot select course they teach
                     if (teachingCourses.contains(exam.getCourseCode())) {
                         canSelect = false;
                         reason = "Cannot select exam for course you teach";
                         logger.debug("Staff {} cannot select {} - teaches this course", staffId, exam.getCourseCode());
                     }
                     
-                    //Rule2: Cannot select multiple slots on same day
+                    // Rule: Cannot select multiple slots on same day
                     if (canSelect) {
                         List<ExamSlot> slotsOnSameDay = examSlotRepository.findByStaffIdAndExamDate(staffId, exam.getExamDate());
                         if (!slotsOnSameDay.isEmpty()) {
@@ -131,9 +131,9 @@ public class SlotPreferenceService {
         return slots;
     }
     
-    /*
-    Get all slots for viewing (HOD, CCC, Admin can view but not select)
-    */
+    /**
+     * Get all slots for viewing (HOD, CCC, Admin can view but not select)
+     */
     public List<SlotResponse> getAllSlotsForViewing(Integer academicYear, String term) {
         List<Exam> exams = examRepository.findExamsForSlotGeneration(academicYear, term);
         List<SlotResponse> slots = new ArrayList<>();
@@ -150,7 +150,7 @@ public class SlotPreferenceService {
                 slot.setExamDate(exam.getExamDate());
                 slot.setTime(exam.getTime());
                 
-                //Check if slot is taken
+                // Check if slot is taken
                 Optional<ExamSlot> existingSlot = examSlotRepository.findByExamIdAndSlotId(exam.getExamId(), slotId);
                 
                 if (existingSlot.isPresent()) {
@@ -171,13 +171,13 @@ public class SlotPreferenceService {
         return slots;
     }
     
-    /*
-    Get all slots with staff details (Admin only)
-    */
+    /**
+     * Get all slots with staff details (Admin only)
+     */
     public List<SlotResponse> getAllSlotsWithStaffDetails(Integer academicYear, String term) {
         List<SlotResponse> slots = getAllSlotsForViewing(academicYear, term);
         
-        //Add staff names for occupied slots
+        // Add staff names for occupied slots
         for (SlotResponse slot : slots) {
             if ("OCCUPIED".equals(slot.getStatus()) && slot.getPreferredBy() != null) {
                 Optional<Staff> staffOpt = staffRepository.findByStaffId(slot.getPreferredBy());
@@ -196,18 +196,18 @@ public class SlotPreferenceService {
         logger.debug("Selecting slot preference - Staff: {}, Exam: {}, Slot: {}", 
                     request.getStaffId(), request.getExamId(), request.getSlotId());
         
-        //Check if staff is eligible for exam duties
+        // Check if staff is eligible for exam duties
         if (!staffEligibilityService.isEligibleForExamDuty(request.getStaffId())) {
             throw new RuntimeException(staffEligibilityService.getIneligibilityReason(request.getStaffId()));
         }
         
-        //Validate staff exists
+        // Validate staff exists
         Optional<Staff> staffOpt = staffRepository.findByStaffId(request.getStaffId());
         if (!staffOpt.isPresent()) {
             throw new RuntimeException("Staff not found");
         }
         
-        //Validate exam exists
+        // Validate exam exists
         Optional<Exam> examOpt = examRepository.findById(request.getExamId());
         if (!examOpt.isPresent()) {
             throw new RuntimeException("Exam not found");
@@ -216,7 +216,7 @@ public class SlotPreferenceService {
         Exam exam = examOpt.get();
         Staff staff = staffOpt.get();
         
-        //Check if slot is already taken
+        // Check if slot is already taken
         Optional<ExamSlot> existingSlot = examSlotRepository.findByExamIdAndSlotId(request.getExamId(), request.getSlotId());
         if (existingSlot.isPresent()) {
             if (!existingSlot.get().getPreferredBy().equals(request.getStaffId())) {
@@ -226,28 +226,30 @@ public class SlotPreferenceService {
             }
         }
         
-        //Check if staff teaches this course
-        List<String> teachingCourses = staff.getCourses().stream()
-            .map(Course::getCourseCode)
-            .collect(Collectors.toList());
-        
-        if (teachingCourses.contains(exam.getCourseCode())) {
-            throw new RuntimeException("Cannot select exam for course you teach");
+        // Check if staff teaches this course
+        if (staff.getCourses() != null) {
+            List<String> teachingCourses = staff.getCourses().stream()
+                .map(Course::getCourseCode)
+                .collect(Collectors.toList());
+            
+            if (teachingCourses.contains(exam.getCourseCode())) {
+                throw new RuntimeException("Cannot select exam for course you teach");
+            }
         }
         
-        //Check if staff already has a slot on the same day
+        // Check if staff already has a slot on the same day
         List<ExamSlot> slotsOnSameDay = examSlotRepository.findByStaffIdAndExamDate(request.getStaffId(), exam.getExamDate());
         if (!slotsOnSameDay.isEmpty()) {
             throw new RuntimeException("Cannot select multiple slots on the same day");
         }
         
-        //Check if staff has reached duty limit
+        // Check if staff has reached duty limit
         StaffDutyInfo dutyInfo = getStaffDutyInfo(request.getStaffId(), exam.getAcademicYear(), exam.getTerm());
         if (dutyInfo.getRemainingDuties() <= 0) {
             throw new RuntimeException("You have already selected all required duties");
         }
         
-        //Create new slot preference
+        // Create new slot preference
         ExamSlot newSlot = new ExamSlot();
         newSlot.setExamId(request.getExamId());
         newSlot.setSlotId(request.getSlotId());
@@ -265,7 +267,7 @@ public class SlotPreferenceService {
         logger.debug("Removing slot preference - Staff: {}, Exam: {}, Slot: {}", 
                     request.getStaffId(), request.getExamId(), request.getSlotId());
         
-        //Check if staff is eligible for exam duties
+        // Check if staff is eligible for exam duties
         if (!staffEligibilityService.isEligibleForExamDuty(request.getStaffId())) {
             throw new RuntimeException(staffEligibilityService.getIneligibilityReason(request.getStaffId()));
         }
@@ -292,14 +294,14 @@ public class SlotPreferenceService {
         return "Slot preference removed successfully";
     }
     
-    /*
-    Remove slot preference by exam duty ID (Alternative method for easier frontend integration)
+    /**
+     * Remove slot preference by exam duty ID (Alternative method for easier frontend integration)
      */
     @Transactional
     public String removeSlotPreferenceById(Integer examDutyId, String staffId) {
         logger.debug("Removing slot preference by ID - Staff: {}, ExamDutyId: {}", staffId, examDutyId);
         
-        //Check if staff is eligible for exam duties
+        // Check if staff is eligible for exam duties
         if (!staffEligibilityService.isEligibleForExamDuty(staffId)) {
             throw new RuntimeException(staffEligibilityService.getIneligibilityReason(staffId));
         }
@@ -327,7 +329,7 @@ public class SlotPreferenceService {
     }
     
     public StaffDutyInfo getStaffDutyInfo(String staffId, Integer academicYear, String term) {
-        //Check if staff is eligible for exam duties
+        // Check if staff is eligible for exam duties
         if (!staffEligibilityService.isEligibleForExamDuty(staffId)) {
             throw new RuntimeException(staffEligibilityService.getIneligibilityReason(staffId));
         }
@@ -340,19 +342,19 @@ public class SlotPreferenceService {
         Staff staff = staffOpt.get();
         String staffName = staff.getFirstName() + " " + staff.getLastName();
         
-        //Get required duties based on cadre
+        // Get required duties based on cadre
         Optional<StaffDuty> staffDutyOpt = staffDutyRepository.findByStaffIdAndAcademicYearAndTerm(staffId, academicYear, term);
         Integer requiredDuties = staffDutyOpt.map(StaffDuty::getDutyCount).orElse(0);
         
-        //Count selected duties
+        // Count selected duties
         Long selectedDuties = examSlotRepository.countByPreferredBy(staffId);
         
         return new StaffDutyInfo(staffId, staffName, staff.getAcademicRank(), 
                                requiredDuties, selectedDuties.intValue());
     }
     
-    /*
-    Get staff duty info for viewing(allows HOD and CCC to view their info)
+    /**
+     * Get staff duty info for viewing (allows HOD and CCC to view their info)
      */
     public StaffDutyInfo getStaffDutyInfoForViewing(String staffId, Integer academicYear, String term) {
         Optional<Staff> staffOpt = staffRepository.findByStaffId(staffId);
@@ -363,11 +365,11 @@ public class SlotPreferenceService {
         Staff staff = staffOpt.get();
         String staffName = staff.getFirstName() + " " + staff.getLastName();
         
-        //Get required duties based on cadre(will be 0 for HOD and CCC)
+        // Get required duties based on cadre (will be 0 for HOD and CCC)
         Optional<StaffDuty> staffDutyOpt = staffDutyRepository.findByStaffIdAndAcademicYearAndTerm(staffId, academicYear, term);
         Integer requiredDuties = staffDutyOpt.map(StaffDuty::getDutyCount).orElse(0);
         
-        //Count selected duties
+        // Count selected duties
         Long selectedDuties = examSlotRepository.countByPreferredBy(staffId);
         
         return new StaffDutyInfo(staffId, staffName, staff.getAcademicRank(), 
@@ -375,7 +377,7 @@ public class SlotPreferenceService {
     }
     
     public List<SlotResponse> getStaffSelectedSlots(String staffId) {
-        //Check if staff is eligible for exam duties
+        // Check if staff is eligible for exam duties
         if (!staffEligibilityService.isEligibleForExamDuty(staffId)) {
             throw new RuntimeException(staffEligibilityService.getIneligibilityReason(staffId));
         }
@@ -384,16 +386,16 @@ public class SlotPreferenceService {
         return convertToSlotResponses(selectedSlots, staffId, true);
     }
     
-    /*
-    Get staff selected slots for viewing(allows HOD and CCC to view their selections)
+    /**
+     * Get staff selected slots for viewing (allows HOD and CCC to view their selections)
      */
     public List<SlotResponse> getStaffSelectedSlotsForViewing(String staffId) {
         List<ExamSlot> selectedSlots = examSlotRepository.findByPreferredBy(staffId);
         return convertToSlotResponses(selectedSlots, staffId, false);
     }
     
-    /*
-    Helper method to convert ExamSlot entities to SlotResponse DTOs
+    /**
+     * Helper method to convert ExamSlot entities to SlotResponse DTOs
      */
     private List<SlotResponse> convertToSlotResponses(List<ExamSlot> selectedSlots, String staffId, boolean canRemove) {
         List<SlotResponse> slots = new ArrayList<>();
@@ -402,10 +404,10 @@ public class SlotPreferenceService {
             SlotResponse response = new SlotResponse();
             response.setExamId(slot.getExamId());
             response.setSlotId(slot.getSlotId());
-            response.setExamDutyId(slot.getExamDutyId());
+            response.setExamDutyId(slot.getExamDutyId()); // Include examDutyId for removal
             response.setStatus("SELECTED");
             response.setPreferredBy(slot.getPreferredBy());
-            response.setCanSelect(canRemove && slot.getAllotedTo() == null);
+            response.setCanSelect(canRemove && slot.getAllotedTo() == null); // Can remove if not allotted
             
             if (slot.getAllotedTo() != null) {
                 response.setReason("Already allotted - cannot remove");

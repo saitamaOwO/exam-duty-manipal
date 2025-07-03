@@ -1,7 +1,5 @@
-version: '3.8'
-
 services:
-  #PostgreSQL Database
+  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: exam-duty-postgres
@@ -9,9 +7,8 @@ services:
       POSTGRES_DB: exam_duty_allocation
       POSTGRES_USER: examduty
       POSTGRES_PASSWORD: examduty123
-      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/docker-init:/docker-entrypoint-initdb.d:ro
@@ -19,12 +16,13 @@ services:
       - exam-duty-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U examduty -d exam_duty_allocation"]
-      interval: 10s
-      timeout: 5s
+      interval: 15s
+      timeout: 10s
       retries: 5
+      start_period: 30s
     restart: unless-stopped
 
-  #Spring Boot Application
+  # Spring Boot Application
   app:
     build:
       context: .
@@ -52,7 +50,7 @@ services:
       start_period: 60s
     restart: unless-stopped
 
-  #pgAdmin for Database Management
+  # pgAdmin for Database Management
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: exam-duty-pgadmin
