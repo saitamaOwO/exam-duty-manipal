@@ -47,7 +47,7 @@ public class SlotPreferenceService {
     private StaffEligibilityService staffEligibilityService;
     
     public List<SlotResponse> getAvailableSlots(String staffId, Integer academicYear, String term) {
-        // First check if staff is eligible for exam duties
+        // check if staff is eligible for exam duties
         if (!staffEligibilityService.isEligibleForExamDuty(staffId)) {
             throw new RuntimeException(staffEligibilityService.getIneligibilityReason(staffId));
         }
@@ -131,8 +131,8 @@ public class SlotPreferenceService {
         return slots;
     }
     
-    /**
-     * Get all slots for viewing (HOD, CCC, Admin can view but not select)
+    /*
+     Get all slots for viewing (HOD, CCC, Admin can view but not select)
      */
     public List<SlotResponse> getAllSlotsForViewing(Integer academicYear, String term) {
         List<Exam> exams = examRepository.findExamsForSlotGeneration(academicYear, term);
@@ -171,8 +171,8 @@ public class SlotPreferenceService {
         return slots;
     }
     
-    /**
-     * Get all slots with staff details (Admin only)
+    /*
+     Get all slots with staff details (Admin only)
      */
     public List<SlotResponse> getAllSlotsWithStaffDetails(Integer academicYear, String term) {
         List<SlotResponse> slots = getAllSlotsForViewing(academicYear, term);
@@ -294,8 +294,8 @@ public class SlotPreferenceService {
         return "Slot preference removed successfully";
     }
     
-    /**
-     * Remove slot preference by exam duty ID (Alternative method for easier frontend integration)
+    /*
+     Remove slot preference by exam duty ID
      */
     @Transactional
     public String removeSlotPreferenceById(Integer examDutyId, String staffId) {
@@ -353,7 +353,7 @@ public class SlotPreferenceService {
                                requiredDuties, selectedDuties.intValue());
     }
     
-    /**
+    /*
      * Get staff duty info for viewing (allows HOD and CCC to view their info)
      */
     public StaffDutyInfo getStaffDutyInfoForViewing(String staffId, Integer academicYear, String term) {
@@ -365,7 +365,7 @@ public class SlotPreferenceService {
         Staff staff = staffOpt.get();
         String staffName = staff.getFirstName() + " " + staff.getLastName();
         
-        // Get required duties based on cadre (will be 0 for HOD and CCC)
+        // Get required duties based on cadre (0 for HOD and CCC)
         Optional<StaffDuty> staffDutyOpt = staffDutyRepository.findByStaffIdAndAcademicYearAndTerm(staffId, academicYear, term);
         Integer requiredDuties = staffDutyOpt.map(StaffDuty::getDutyCount).orElse(0);
         
@@ -386,16 +386,16 @@ public class SlotPreferenceService {
         return convertToSlotResponses(selectedSlots, staffId, true);
     }
     
-    /**
-     * Get staff selected slots for viewing (allows HOD and CCC to view their selections)
+    /*
+     Get staff selected slots for viewing (allows HOD and CCC to view their selections)
      */
     public List<SlotResponse> getStaffSelectedSlotsForViewing(String staffId) {
         List<ExamSlot> selectedSlots = examSlotRepository.findByPreferredBy(staffId);
         return convertToSlotResponses(selectedSlots, staffId, false);
     }
     
-    /**
-     * Helper method to convert ExamSlot entities to SlotResponse DTOs
+    /*
+     Helper method to convert ExamSlot entities to SlotResponse DTOs
      */
     private List<SlotResponse> convertToSlotResponses(List<ExamSlot> selectedSlots, String staffId, boolean canRemove) {
         List<SlotResponse> slots = new ArrayList<>();
@@ -404,10 +404,10 @@ public class SlotPreferenceService {
             SlotResponse response = new SlotResponse();
             response.setExamId(slot.getExamId());
             response.setSlotId(slot.getSlotId());
-            response.setExamDutyId(slot.getExamDutyId()); // Include examDutyId for removal
+            response.setExamDutyId(slot.getExamDutyId());
             response.setStatus("SELECTED");
             response.setPreferredBy(slot.getPreferredBy());
-            response.setCanSelect(canRemove && slot.getAllotedTo() == null); // Can remove if not allotted
+            response.setCanSelect(canRemove && slot.getAllotedTo() == null);
             
             if (slot.getAllotedTo() != null) {
                 response.setReason("Already allotted - cannot remove");
@@ -429,7 +429,6 @@ public class SlotPreferenceService {
             
             slots.add(response);
         }
-        
         return slots;
     }
 }
