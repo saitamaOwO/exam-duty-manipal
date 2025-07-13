@@ -9,11 +9,11 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "COURSE")
+@Table(name = "course", schema = "common")
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "course_seq")
-    @SequenceGenerator(name = "course_seq", sequenceName = "course_seq", allocationSize = 1)
+    @SequenceGenerator(name = "course_seq", sequenceName = "common.course_seq", allocationSize = 1)
     @Column(name = "course_id")
     private Integer courseId;
     
@@ -31,6 +31,9 @@ public class Course {
     
     @Column(name = "credit")
     private Integer credit;
+    
+    @Column(name = "program")
+    private String program;
     
     @Column(name = "semester")
     private String semester;
@@ -70,6 +73,9 @@ public class Course {
     
     public Integer getCredit() { return credit; }
     public void setCredit(Integer credit) { this.credit = credit; }
+    
+    public String getProgram() { return program; }
+    public void setProgram(String program) { this.program = program; }
     
     public String getSemester() { return semester; }
     public void setSemester(String semester) { this.semester = semester; }

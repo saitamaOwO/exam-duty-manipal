@@ -1,6 +1,7 @@
 package com.exam.duty.backend.dto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 public class SlotResponse {
     private Integer examId;
@@ -9,7 +10,7 @@ public class SlotResponse {
     private String courseCode;
     private String courseName;
     private LocalDate examDate;
-    private String time;
+    private LocalTime time;
     private String status;
     private String preferredBy;
     private boolean canSelect;
@@ -18,7 +19,7 @@ public class SlotResponse {
     public SlotResponse() {}
     
     public SlotResponse(Integer examId, Integer slotId, String courseCode, String courseName, 
-                      LocalDate examDate, String time, String status) {
+                      LocalDate examDate, LocalTime time, String status) {
         this.examId = examId;
         this.slotId = slotId;
         this.courseCode = courseCode;
@@ -46,8 +47,8 @@ public class SlotResponse {
     public LocalDate getExamDate() { return examDate; }
     public void setExamDate(LocalDate examDate) { this.examDate = examDate; }
     
-    public String getTime() { return time; }
-    public void setTime(String time) { this.time = time; }
+    public LocalTime getTime() { return time; }
+    public void setTime(LocalTime time) { this.time = time; }
     
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

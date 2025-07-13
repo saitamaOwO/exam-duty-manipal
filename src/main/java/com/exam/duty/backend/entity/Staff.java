@@ -9,11 +9,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "STAFF")
+@Table(name = "staff", schema = "common")
 public class Staff {
     @Id
     @Column(name = "staff_id")
@@ -22,8 +23,8 @@ public class Staff {
     @Column(name = "staff_type")
     private String staffType;
     
-    @Column(name = "academic_rank")
-    private String academicRank;
+    @Column(name = "academic_rank_id")
+    private Integer academicRankId;
     
     @Column(name = "first_name")
     private String firstName;
@@ -31,7 +32,7 @@ public class Staff {
     @Column(name = "last_name")
     private String lastName;
     
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
     
     @Column(name = "mobile")
@@ -39,6 +40,9 @@ public class Staff {
     
     @Column(name = "cabin_location")
     private String cabinLocation;
+    
+    @Column(name = "examduty_workload")
+    private Integer examdutyWorkload;
     
     @Column(name = "school_id")
     private Integer schoolId;
@@ -49,9 +53,22 @@ public class Staff {
     @Column(name = "password")
     private String password;
     
+    @ManyToOne
+    @JoinColumn(name = "academic_rank_id", insertable = false, updatable = false)
+    private AcademicRank academicRank;
+    
+    @ManyToOne
+    @JoinColumn(name = "school_id", insertable = false, updatable = false)
+    private School school;
+    
+    @ManyToOne
+    @JoinColumn(name = "department_id", insertable = false, updatable = false)
+    private Department department;
+    
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "STAFF_COURSE",
+        name = "staff_course",
+        schema = "common",
         joinColumns = @JoinColumn(name = "staff_id"),
         inverseJoinColumns = @JoinColumn(name = "course_id")
     )
@@ -62,10 +79,9 @@ public class Staff {
     
     public Staff() {}
     
-    public Staff(String staffId, String staffType, String academicRank, String firstName, String lastName, String email) {
+    public Staff(String staffId, String staffType, String firstName, String lastName, String email) {
         this.staffId = staffId;
         this.staffType = staffType;
-        this.academicRank = academicRank;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -77,8 +93,8 @@ public class Staff {
     public String getStaffType() { return staffType; }
     public void setStaffType(String staffType) { this.staffType = staffType; }
     
-    public String getAcademicRank() { return academicRank; }
-    public void setAcademicRank(String academicRank) { this.academicRank = academicRank; }
+    public Integer getAcademicRankId() { return academicRankId; }
+    public void setAcademicRankId(Integer academicRankId) { this.academicRankId = academicRankId; }
     
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
@@ -95,6 +111,9 @@ public class Staff {
     public String getCabinLocation() { return cabinLocation; }
     public void setCabinLocation(String cabinLocation) { this.cabinLocation = cabinLocation; }
     
+    public Integer getExamdutyWorkload() { return examdutyWorkload; }
+    public void setExamdutyWorkload(Integer examdutyWorkload) { this.examdutyWorkload = examdutyWorkload; }
+    
     public Integer getSchoolId() { return schoolId; }
     public void setSchoolId(Integer schoolId) { this.schoolId = schoolId; }
     
@@ -103,6 +122,15 @@ public class Staff {
     
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+    
+    public AcademicRank getAcademicRank() { return academicRank; }
+    public void setAcademicRank(AcademicRank academicRank) { this.academicRank = academicRank; }
+    
+    public School getSchool() { return school; }
+    public void setSchool(School school) { this.school = school; }
+    
+    public Department getDepartment() { return department; }
+    public void setDepartment(Department department) { this.department = department; }
     
     public Set<Course> getCourses() { return courses; }
     public void setCourses(Set<Course> courses) { this.courses = courses; }

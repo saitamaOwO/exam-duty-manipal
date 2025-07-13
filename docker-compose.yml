@@ -28,7 +28,7 @@ services:
     container_name: exam-duty-app
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/exam_duty_allocation
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/exam_duty_allocation?currentSchema=common,examduty
       SPRING_DATASOURCE_USERNAME: examduty_user
       SPRING_DATASOURCE_PASSWORD: examduty123
       JWT_SECRET: myVerySecretKeyForJWTTokenGenerationThatShouldBeAtLeast256BitsLongForDockerEnvironment
@@ -45,8 +45,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 90s
     restart: unless-stopped
+    command: >
+      /bin/sh -c "
+        sleep 30;
+        until pg_isready -h postgres -p 5432 -U postgres -d exam_duty_allocation; do
+          echo 'Waiting for PostgreSQL to be ready...'
+          sleep 5
+        done
+        java -jar target/exam-duty-system-0.0.1-SNAPSHOT.jar
+      "
 
   pgadmin:
     image: dpage/pgadmin4:latest

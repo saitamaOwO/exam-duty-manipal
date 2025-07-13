@@ -1,3 +1,5 @@
+DROP TRIGGER IF EXISTS trigger_update_staff_workload ON examduty.exam_slot;
+
 -- WORKLOAD UPDATE TRIGGER
 CREATE OR REPLACE FUNCTION examduty.update_staff_workload()
 RETURNS TRIGGER AS $$

@@ -1,14 +1,15 @@
 package com.exam.duty.backend.repository;
 
-import com.exam.duty.backend.entity.ExamSlot;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import com.exam.duty.backend.entity.ExamSlot;
 
 @Repository
 public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
@@ -27,8 +28,8 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
     @Query("SELECT COUNT(es) FROM ExamSlot es WHERE es.preferredBy = :staffId")
     Long countByPreferredBy(@Param("staffId") String staffId);
     
-    @Query("SELECT es FROM ExamSlot es JOIN es.exam e WHERE e.academicYear = :academicYear " +
-           "AND e.term = :term ORDER BY e.examDate, e.time")
+    @Query("SELECT es FROM ExamSlot es LEFT JOIN FETCH es.exam e LEFT JOIN FETCH e.course WHERE e.academicYear = :academicYear " +
+           "AND e.term = :term ORDER BY e.examDate, e.startTime")
     List<ExamSlot> findAllSlotsForTerm(@Param("academicYear") Integer academicYear, 
                                       @Param("term") String term);
 }

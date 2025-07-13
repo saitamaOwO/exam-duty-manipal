@@ -3,8 +3,8 @@ FROM eclipse-temurin:17-jdk-alpine
 # Set the working directory inside the container
 WORKDIR /app
 
-# Install curl and maven for health checks and building
-RUN apk update && apk add --no-cache curl maven && rm -rf /var/cache/apk/*
+# Install curl, maven, and postgresql-client for health checks and building
+RUN apk update && apk add --no-cache curl maven postgresql-client && rm -rf /var/cache/apk/*
 
 # Copy pom.xml first
 COPY pom.xml ./

@@ -9,11 +9,11 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "ROLE")
+@Table(name = "role", schema = "common")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_seq")
-    @SequenceGenerator(name = "role_seq", sequenceName = "role_seq", allocationSize = 1)
+    @SequenceGenerator(name = "role_seq", sequenceName = "common.role_seq", allocationSize = 1)
     @Column(name = "role_id")
     private Integer roleId;
     

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.exam.duty.backend.dto.AuthRequest;
 import com.exam.duty.backend.dto.AuthResponse;
+import com.exam.duty.backend.entity.AcademicRank;
 import com.exam.duty.backend.entity.Staff;
 import com.exam.duty.backend.repository.StaffRepository;
 import com.exam.duty.backend.security.JwtUtil;
@@ -47,7 +48,7 @@ public class AuthService {
             return List.of("ADMIN");
         } else {
             //For teaching staff, determine based on academic rank
-            String rank = staff.getAcademicRank();
+            AcademicRank rank = staff.getAcademicRank();
             if (rank != null && rank.toLowerCase().contains("professor")) {
                 return List.of("FACULTY", "HOD");
             } else {

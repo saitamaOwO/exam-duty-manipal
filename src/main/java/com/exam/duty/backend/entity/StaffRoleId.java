@@ -3,7 +3,11 @@ package com.exam.duty.backend.entity;
 import java.io.Serializable;
 import java.util.Objects;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class StaffRoleId implements Serializable {
+    
     private String staffId;
     private Integer roleId;
     
@@ -20,7 +24,6 @@ public class StaffRoleId implements Serializable {
     public Integer getRoleId() { return roleId; }
     public void setRoleId(Integer roleId) { this.roleId = roleId; }
     
-    //equals and hashCode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -9,41 +9,41 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "staff_role", schema = "common")
-@IdClass(StaffRoleId.class)
-public class StaffRole {
+@Table(name = "staff_course", schema = "common")
+@IdClass(StaffCourseId.class)
+public class StaffCourse {
     @Id
     @Column(name = "staff_id")
     private String staffId;
     
     @Id
-    @Column(name = "role_id")
-    private Integer roleId;
+    @Column(name = "course_id")
+    private Integer courseId;
     
     @ManyToOne
     @JoinColumn(name = "staff_id", insertable = false, updatable = false)
     private Staff staff;
     
     @ManyToOne
-    @JoinColumn(name = "role_id", insertable = false, updatable = false)
-    private Role role;
+    @JoinColumn(name = "course_id", insertable = false, updatable = false)
+    private Course course;
     
-    public StaffRole() {}
+    public StaffCourse() {}
     
-    public StaffRole(String staffId, Integer roleId) {
+    public StaffCourse(String staffId, Integer courseId) {
         this.staffId = staffId;
-        this.roleId = roleId;
+        this.courseId = courseId;
     }
     
     public String getStaffId() { return staffId; }
     public void setStaffId(String staffId) { this.staffId = staffId; }
     
-    public Integer getRoleId() { return roleId; }
-    public void setRoleId(Integer roleId) { this.roleId = roleId; }
+    public Integer getCourseId() { return courseId; }
+    public void setCourseId(Integer courseId) { this.courseId = courseId; }
     
     public Staff getStaff() { return staff; }
     public void setStaff(Staff staff) { this.staff = staff; }
     
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
+    public Course getCourse() { return course; }
+    public void setCourse(Course course) { this.course = course; }
 }

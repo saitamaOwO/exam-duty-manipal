@@ -13,11 +13,11 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "EXAM_SLOT")
+@Table(name = "exam_slot", schema = "examduty")
 public class ExamSlot {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "exam_slot_seq")
-    @SequenceGenerator(name = "exam_slot_seq", sequenceName = "exam_slot_seq", allocationSize = 1)
+    @SequenceGenerator(name = "exam_slot_seq", sequenceName = "examduty.exam_slot_seq", allocationSize = 1)
     @Column(name = "exam_duty_id")
     private Integer examDutyId;
     
@@ -48,6 +48,7 @@ public class ExamSlot {
     @ManyToOne
     @JoinColumn(name = "exam_id", insertable = false, updatable = false)
     private Exam exam;
+    
     public ExamSlot() {}
     
     public ExamSlot(Integer examId, Integer slotId, String preferredBy) {

@@ -69,7 +69,7 @@ public class SlotPreferenceService {
         }
         
         for (Exam exam : exams) {
-            logger.debug("Processing exam for course: {}", exam.getCourseCode());
+            logger.debug("Processing exam for course: {}", exam.getCourse() != null ? exam.getCourse().getCourseCode() : exam.getCourseId());
             
             // Generate slots for each exam based on required duties
             int totalSlots = exam.getNoOfInvigilators() + exam.getNoOfRelievers() + exam.getNoOfSquads();
@@ -78,10 +78,10 @@ public class SlotPreferenceService {
                 SlotResponse slot = new SlotResponse();
                 slot.setExamId(exam.getExamId());
                 slot.setSlotId(slotId);
-                slot.setCourseCode(exam.getCourseCode());
+                slot.setCourseCode(exam.getCourse() != null ? exam.getCourse().getCourseCode() : String.valueOf(exam.getCourseId()));
                 slot.setCourseName(exam.getCourse() != null ? exam.getCourse().getCourseName() : "");
                 slot.setExamDate(exam.getExamDate());
-                slot.setTime(exam.getTime());
+                slot.setTime(exam.getStartTime());
                 
                 // Check if slot is already taken
                 Optional<ExamSlot> existingSlot = examSlotRepository.findByExamIdAndSlotId(exam.getExamId(), slotId);
@@ -105,10 +105,10 @@ public class SlotPreferenceService {
                     String reason = "";
                     
                     // Rule: Cannot select course they teach
-                    if (teachingCourses.contains(exam.getCourseCode())) {
+                    if (exam.getCourse() != null && teachingCourses.contains(exam.getCourse().getCourseCode())) {
                         canSelect = false;
                         reason = "Cannot select exam for course you teach";
-                        logger.debug("Staff {} cannot select {} - teaches this course", staffId, exam.getCourseCode());
+                        logger.debug("Staff {} cannot select {} - teaches this course", staffId, exam.getCourse().getCourseCode());
                     }
                     
                     // Rule: Cannot select multiple slots on same day
@@ -145,10 +145,10 @@ public class SlotPreferenceService {
                 SlotResponse slot = new SlotResponse();
                 slot.setExamId(exam.getExamId());
                 slot.setSlotId(slotId);
-                slot.setCourseCode(exam.getCourseCode());
+                slot.setCourseCode(exam.getCourse() != null ? exam.getCourse().getCourseCode() : String.valueOf(exam.getCourseId()));
                 slot.setCourseName(exam.getCourse() != null ? exam.getCourse().getCourseName() : "");
                 slot.setExamDate(exam.getExamDate());
-                slot.setTime(exam.getTime());
+                slot.setTime(exam.getStartTime());
                 
                 // Check if slot is taken
                 Optional<ExamSlot> existingSlot = examSlotRepository.findByExamIdAndSlotId(exam.getExamId(), slotId);
@@ -232,7 +232,7 @@ public class SlotPreferenceService {
                 .map(Course::getCourseCode)
                 .collect(Collectors.toList());
             
-            if (teachingCourses.contains(exam.getCourseCode())) {
+            if (exam.getCourse() != null && teachingCourses.contains(exam.getCourse().getCourseCode())) {
                 throw new RuntimeException("Cannot select exam for course you teach");
             }
         }
@@ -418,9 +418,9 @@ public class SlotPreferenceService {
             }
             
             if (slot.getExam() != null) {
-                response.setCourseCode(slot.getExam().getCourseCode());
+                response.setCourseCode(slot.getExam().getCourse() != null ? slot.getExam().getCourse().getCourseCode() : String.valueOf(slot.getExam().getCourseId()));
                 response.setExamDate(slot.getExam().getExamDate());
-                response.setTime(slot.getExam().getTime());
+                response.setTime(slot.getExam().getStartTime());
                 
                 if (slot.getExam().getCourse() != null) {
                     response.setCourseName(slot.getExam().getCourse().getCourseName());
@@ -429,6 +429,7 @@ public class SlotPreferenceService {
             
             slots.add(response);
         }
+        
         return slots;
     }
 }
