@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://postgres:5432/exam_duty_allocation?currentSchema=common,examduty
     username: examduty_user
-    password: examduty123
+    password: examduty123  
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -12,7 +12,7 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_schema: common
+        default_schema: examduty
     open-in-view: false
 server:
   port: 8081

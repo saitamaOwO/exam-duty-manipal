@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: exam_duty_allocation
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres123
+      POSTGRES_PASSWORD: admin123
     ports:
       - "5433:5432"
     volumes:
@@ -47,15 +47,6 @@ services:
       retries: 3
       start_period: 90s
     restart: unless-stopped
-    command: >
-      /bin/sh -c "
-        sleep 30;
-        until pg_isready -h postgres -p 5432 -U postgres -d exam_duty_allocation; do
-          echo 'Waiting for PostgreSQL to be ready...'
-          sleep 5
-        done
-        java -jar target/exam-duty-system-0.0.1-SNAPSHOT.jar
-      "
 
   pgadmin:
     image: dpage/pgadmin4:latest
