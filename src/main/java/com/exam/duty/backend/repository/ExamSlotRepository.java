@@ -13,23 +13,23 @@ import com.exam.duty.backend.entity.ExamSlot;
 
 @Repository
 public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
-    
+
     List<ExamSlot> findByExamId(Integer examId);
-    
+
     List<ExamSlot> findByPreferredBy(String staffId);
-    
+
     Optional<ExamSlot> findByExamIdAndSlotId(Integer examId, Integer slotId);
-    
+
     @Query("SELECT es FROM ExamSlot es JOIN es.exam e WHERE es.preferredBy = :staffId " +
            "AND e.examDate = :examDate")
-    List<ExamSlot> findByStaffIdAndExamDate(@Param("staffId") String staffId, 
+    List<ExamSlot> findByStaffIdAndExamDate(@Param("staffId") String staffId,
                                            @Param("examDate") LocalDate examDate);
-    
+
     @Query("SELECT COUNT(es) FROM ExamSlot es WHERE es.preferredBy = :staffId")
     Long countByPreferredBy(@Param("staffId") String staffId);
-    
+
     @Query("SELECT es FROM ExamSlot es LEFT JOIN FETCH es.exam e LEFT JOIN FETCH e.course WHERE e.academicYear = :academicYear " +
-           "AND e.term = :term ORDER BY e.examDate, e.startTime")
-    List<ExamSlot> findAllSlotsForTerm(@Param("academicYear") Integer academicYear, 
+           "AND e.term = :term ORDER BY e.examDate, e.examTime")
+    List<ExamSlot> findAllSlotsForTerm(@Param("academicYear") Integer academicYear,
                                       @Param("term") String term);
 }

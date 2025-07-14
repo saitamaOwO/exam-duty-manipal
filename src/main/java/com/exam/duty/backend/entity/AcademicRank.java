@@ -16,33 +16,35 @@ public class AcademicRank {
     @SequenceGenerator(name = "academic_rank_seq", sequenceName = "common.academic_rank_seq", allocationSize = 1)
     @Column(name = "academic_rank_id")
     private Integer academicRankId;
-    
+
     @Column(name = "name")
     private String name;
-    
+
     @Column(name = "cadre_id")
     private Integer cadreId;
-    
+
     @Column(name = "examduty_base_workload")
     private Integer examdutyBaseWorkload;
-    
+
+    // Constructors
     public AcademicRank() {}
-    
+
     public AcademicRank(String name, Integer cadreId, Integer examdutyBaseWorkload) {
         this.name = name;
         this.cadreId = cadreId;
         this.examdutyBaseWorkload = examdutyBaseWorkload;
     }
-    
+
+    // Getters and Setters
     public Integer getAcademicRankId() { return academicRankId; }
     public void setAcademicRankId(Integer academicRankId) { this.academicRankId = academicRankId; }
-    
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-    
+
     public Integer getCadreId() { return cadreId; }
     public void setCadreId(Integer cadreId) { this.cadreId = cadreId; }
-    
+
     public Integer getExamdutyBaseWorkload() { return examdutyBaseWorkload; }
     public void setExamdutyBaseWorkload(Integer examdutyBaseWorkload) { this.examdutyBaseWorkload = examdutyBaseWorkload; }
 

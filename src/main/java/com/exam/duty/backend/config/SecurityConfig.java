@@ -5,10 +5,15 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.HttpFirewall;
@@ -19,6 +24,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.exam.duty.backend.security.JwtAuthenticationEntryPoint;
 import com.exam.duty.backend.security.JwtAuthenticationFilter;
+import com.exam.duty.backend.service.StaffDetailsService;
 
 @Configuration
 @EnableWebSecurity
@@ -31,15 +37,35 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Autowired
+    private StaffDetailsService staffDetailsService;
+
     @Bean
     public HttpFirewall httpFirewall() {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
-        firewall.setAllowUrlEncodedCarriageReturn(true);
         firewall.setAllowUrlEncodedCarriageReturn(true);
         firewall.setAllowUrlEncodedPercent(true);
         firewall.setAllowUrlEncodedPeriod(true);
         firewall.setAllowUrlEncodedSlash(true);
         return firewall;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(staffDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 
     @Bean
@@ -50,29 +76,27 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .authorizeHttpRequests(authz -> authz
-                // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/debug/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
-                
-                // Test endpoints
+
                 .requestMatchers("/api/test/secured").authenticated()
                 .requestMatchers("/api/test/faculty-only").hasRole("FACULTY")
-                
-                // Secured endpoints with role-based access
+
                 .requestMatchers("/api/secure/slot-preferences/view/**").hasAnyRole("FACULTY", "ADMIN", "HOD", "CCC")
-                .requestMatchers("/api/secure/slot-preferences/select/**").hasRole("FACULTY")
+                .requestMatchers("/api/secure/slot-preferences/select").hasRole("FACULTY")
+                .requestMatchers("/api/secure/slot-preferences/remove").hasRole("FACULTY")
                 .requestMatchers("/api/secure/slot-preferences/remove/**").hasRole("FACULTY")
                 .requestMatchers("/api/secure/slot-preferences/available").hasRole("FACULTY")
                 .requestMatchers("/api/secure/slot-preferences/duty-info").hasAnyRole("FACULTY", "HOD", "CCC", "ADMIN")
                 .requestMatchers("/api/secure/slot-preferences/selected").hasAnyRole("FACULTY", "HOD", "CCC", "ADMIN")
                 .requestMatchers("/api/secure/slot-preferences/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/secure/staff-eligibility/**").hasAnyRole("FACULTY", "ADMIN", "HOD", "CCC")
-                
-                // All other requests need authentication
+
                 .anyRequest().authenticated()
             )
+            .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -86,7 +110,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         configuration.setExposedHeaders(List.of("Authorization"));
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

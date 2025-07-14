@@ -12,12 +12,12 @@ import com.exam.duty.backend.entity.Exam;
 
 @Repository
 public interface ExamRepository extends JpaRepository<Exam, Integer> {
-    
+
     List<Exam> findByAcademicYearAndTerm(Integer academicYear, String term);
-    
+
     List<Exam> findByExamDateBetween(LocalDate startDate, LocalDate endDate);
-    
-    @Query("SELECT e FROM Exam e LEFT JOIN FETCH e.course WHERE e.academicYear = :academicYear AND e.term = :term ORDER BY e.examDate, e.startTime")
-    List<Exam> findExamsForSlotGeneration(@Param("academicYear") Integer academicYear, 
+
+    @Query("SELECT e FROM Exam e LEFT JOIN FETCH e.course WHERE e.academicYear = :academicYear AND e.term = :term ORDER BY e.examDate, e.examTime")
+    List<Exam> findExamsForSlotGeneration(@Param("academicYear") Integer academicYear,
                                          @Param("term") String term);
 }

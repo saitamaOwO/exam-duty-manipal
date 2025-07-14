@@ -5,3 +5,5 @@ GRANT ALL ON ALL TABLES IN SCHEMA common TO examduty_user;
 GRANT ALL ON ALL TABLES IN SCHEMA examduty TO examduty_user;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA common TO examduty_user;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA examduty TO examduty_user;
+GRANT UPDATE ON common.academic_rank TO examduty_user;
+GRANT UPDATE ON common.staff TO examduty_user;

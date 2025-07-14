@@ -48,7 +48,6 @@ public class DebugController {
                        auth.getName(), auth.isAuthenticated(), auth.getAuthorities());
         }
         
-        // Try to parse JWT manually
         String token = null;
         boolean tokenValid = false;
         String staffIdFromToken = null;
